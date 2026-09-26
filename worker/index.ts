@@ -81,7 +81,7 @@ export class GameRoom extends DurableObject<Env>{
   if(type==='start'&&g.phase==='lobby'&&g.host===p.id&&g.players.length>=2&&g.players.every(p=>p.ready)){
    g.phase='break';g.wave=1;g.nextAt=0;g.message='Build your defenses. Any bird can start wave 1!';changed=true;this.startLoop();
   }
-  if(type==='launch'&&g.phase==='break'&&g.wave===1&&p.eggs>0){
+  if(type==='launch'&&g.phase==='break'&&p.eggs>0){
    g.phase='wave';g.spawnIndex=0;g.nextSpawnAt=Date.now()+600;g.message=`${p.name} started the raid!`;changed=true;
   }
   if(type==='rematch'&&g.phase==='results'){
@@ -93,7 +93,7 @@ export class GameRoom extends DurableObject<Env>{
    if(type==='place'&&typeof command.tower==='string'&&Number.isInteger(command.pad))changed=place(p,command.tower as TowerType,command.pad as number);
    if(type==='upgrade'&&typeof command.tower==='string'&&Number.isInteger(command.pad))changed=upgrade(p,command.tower as TowerType,command.pad as number);
    if(type==='rebuild'&&Number.isInteger(command.pad))changed=rebuild(p,command.pad as number,g.phase);
-   if(type==='ostrich'&&p.charge>=100&&Date.now()>=p.ostrichUntil){p.charge=0;p.ostrichUntil=Date.now()+10000;changed=true;}
+   if(type==='ostrich'&&g.phase==='wave'&&p.charge>=100&&Date.now()>=p.ostrichUntil){p.charge=0;p.ostrichAt=Date.now();p.ostrichUntil=p.ostrichAt+3200;changed=true;}
   }
   if(changed){await this.save();this.broadcast();}
  }

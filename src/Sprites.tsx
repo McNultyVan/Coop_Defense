@@ -25,3 +25,16 @@ export function TowerSprite({type,level,x,y,down=false}:{type:TowerType;level:nu
   {type!=='fence'&&level>=2&&<><path d="M-22 16 Q0 29 22 16" fill="none" stroke={level===3?'#ffde5a':'#d5e5a1'} strokeWidth={level===3?5:3}/><circle cx="-22" cy="-16" r={level===3?5:3} fill={level===3?'#ffe371':'#e2f5b3'}/><circle cx="22" cy="-16" r={level===3?5:3} fill={level===3?'#ffe371':'#e2f5b3'}/></>}{type!=='fence'&&<><rect x="-14" y="23" width="28" height="11" rx="5" fill="#244c40"/><text y="31" textAnchor="middle" fontSize="8" fontWeight="900" fill="#fff">LV {level}</text></>}
  </g>;
 }
+export function OstrichSprite({x,y}:{x:number;y:number}){
+ return <g transform={`translate(${x} ${y})`} className="ostrich-sprite" pointerEvents="none">
+  <path d="M-62 9h-21m26 10h-18m31-28h-23" stroke="#f8eec3" strokeWidth="6" strokeLinecap="round" opacity=".8"/>
+  <ellipse cx="0" cy="10" rx="34" ry="24" fill="#e8dec6" stroke="#53686d" strokeWidth="3"/>
+  <path d="M-12 20q-25 20-36-8m40 15-6 23m25-21 12 21" fill="none" stroke="#997759" strokeWidth="7" strokeLinecap="round"/>
+  <path d="M15 3Q19-30 39-36Q54-37 47-8L38 10Z" fill="#eee6d6" stroke="#61727d" strokeWidth="3"/>
+  <path d="M29-34Q42-51 56-33L52-21H30Z" fill="#899aaa" stroke="#425c68" strokeWidth="3"/>
+  <circle cx="43" cy="-26" r="4" fill="#e36449"/>
+  <path d="M49-13l18 5-18 5" fill="#e8a34d" stroke="#694d43" strokeWidth="2"/>
+  <path d="M-28-7q24-28 52-13l-2 24q-23-8-47 9Z" fill="#7a91a2" stroke="#425869" strokeWidth="4"/>
+  <path d="M-17-4l34-7m-31 17L14-2" stroke="#dbe4dc" strokeWidth="4"/>
+ </g>;
+}

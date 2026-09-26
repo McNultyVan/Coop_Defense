@@ -28,4 +28,4 @@ See [GAME_SPEC.md](docs/GAME_SPEC.md) for rules and [PLAN.md](docs/PLAN.md) for 
 
 ## Current status
 
-The game is deployed through GitHub-connected Cloudflare Workers Builds. The initial feedback pass added harder waves, true tied ranks, rematches from any player, manual launch of wave 1, a larger lane, attack effects, and distinct sprite upgrades. See [PLAN.md](docs/PLAN.md) for known limits and [ASSETS.md](docs/ASSETS.md) for art licensing.
+The game is deployed through GitHub-connected Cloudflare Workers Builds. The current build includes shared harder waves, rematches from any player, early launch of every wave, removable predator armor, unspent-corn scoring, an armored ostrich sweep, a complete no-scroll map, range indicators, and distinct defense upgrades. See [PLAN.md](docs/PLAN.md) for known limits and [ASSETS.md](docs/ASSETS.md) for art licensing.

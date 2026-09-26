@@ -17,3 +17,35 @@
 @media(max-width:1050px){.game-layout{grid-template-columns:1fr}}
 @media(max-width:720px){.field{min-width:950px}.launch-wave{width:100%}.launch-wave small{display:block;margin:3px 0 0}.wave-countdown{position:sticky;left:50%;top:28%;margin-bottom:-80px;transform:none;display:block;width:100px}}
 @media(prefers-reduced-motion:reduce){.wave-countdown,.wave-clear-toast,.launch-wave{animation:none}}
+/* Readable choices, complete field, and smoother action */
+.field-wrap{overflow:hidden}
+.field{width:100%;min-width:0;height:auto;aspect-ratio:1000/480;max-height:none}
+.farm-prop{image-rendering:pixelated;pointer-events:none}
+.enemy-unit{transition:transform 190ms linear;pointer-events:none}
+.ostrich-run{filter:drop-shadow(0 4px 5px #314a44aa);pointer-events:none}
+.range-highlight{filter:drop-shadow(0 0 9px #ffe17b)}
+.build-panel{padding:18px}
+.build-title strong{font-size:1.1rem}
+.build-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:11px}
+.build-option{min-width:0;text-align:left;padding:14px 16px;min-height:157px;display:flex;flex-direction:column;align-items:flex-start;gap:2px}
+.build-option:hover:not(:disabled){border-color:#e99c42;background:#fff7dd;transform:translateY(-2px)}
+.build-option-icon{font-size:1.85rem!important;line-height:1.2}
+.build-option strong{font-size:1.12rem;line-height:1.2}
+.build-option b{font-size:1rem;color:#ad5e29;margin:3px 0}
+.build-option small{font-size:.88rem;line-height:1.36;color:#3d604a}
+.tower-detail{align-items:flex-start;flex-wrap:wrap;gap:14px}
+.tower-detail>div{flex:1 1 240px}
+.tower-detail strong{font-size:1.2rem}
+.tower-detail p{margin:5px 0;color:#426653;font-size:1rem}
+.tower-detail small{font-size:.83rem}
+.upgrade-action{flex:1 1 260px;max-width:440px;text-align:left;padding:14px 18px}
+.upgrade-action strong{font-size:1.12rem;display:block;line-height:1.24}
+.upgrade-action small{display:block;margin-top:5px;color:#42352b;font-size:.92rem;font-weight:600;line-height:1.35}
+.build-prompt strong{font-size:1.1rem}
+.rules-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.rules-grid>div{border-left:4px solid #87b87c}
+.rules-grid h3{font-size:1.05rem}
+.ostrich.active{background:#d2bbec}
+@media(max-width:720px){.field{width:100%;min-width:0;aspect-ratio:1000/530}.field-wrap{overflow:hidden}.build-options{grid-template-columns:repeat(2,minmax(0,1fr))}.build-option{min-width:0;min-height:175px;padding:10px}.build-option strong{font-size:.95rem}.build-option small{font-size:.76rem}.rules-grid{grid-template-columns:1fr}.wave-countdown{position:absolute;left:50%;top:26%;transform:translateX(-50%);margin:0}}
+@media(max-width:440px){.build-options{grid-template-columns:1fr}.build-option{min-height:0}.upgrade-action{max-width:none}}
+@media(prefers-reduced-motion:reduce){.enemy-unit{transition:none}}
