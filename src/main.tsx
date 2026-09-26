@@ -6,12 +6,36 @@ import './style.css';
 type Session={code:string;token:string};
 const ICON:Record<string,string>={chicken:'🐔',duck:'🦆',goose:'🪿',fox:'🦊',snake:'🐍',wolf:'🐺',fence:'🪵',soy:'🌱',fertilizer:'🌼',peck:'🐤',pond:'💦',honk:'📣'};
 const DEFENSE_DESC:Record<TowerType,[string,string,string]>={
- fence:['A cheap roadblock. Foxes stop; snakes slip under and wolves hop after a pause.','Barbed wire nips and slows passers, even when the fence is down.','Electric barbs hit robots and keep working after the tougher rails collapse.'],
- soy:['A little seed, fired fast. Place it where raiders linger.','Stronger seeds fly faster through the lane.','A flaming three-seed burst can scorch robots.'],
- fertilizer:['Crystals bounce through up to three tightly grouped raiders.','Concentrated crystals hit harder, bounce farther and fire faster.','A five-target bomb blooms into a fading slow-flower ring; robots feel it too.'],
- peck:['A speedy chicken post pecks one nearby raider at a time.','Sharper pecks come faster and hit harder.','A rapid golden beak can punch through robot shells.'],
- pond:['Duck-made splash slows a small cluster at the impact spot.','Bigger, quicker splashes hold groups in place longer.','A frosty wave can soak and slow robots.'],
- honk:['Goose power: a heavy honk shoves and cracks one target.','Deeper honks hit harder and rattle armor more often.','A thunderous blast can shove robots and break their plating.']
+ fence:[
+  'A budget barricade with a fox-sized attitude. Foxes stop here; snakes and wolves can get past after a pause.',
+  'Add barbs: nonrobot passers take damage and slow down, even after the rails fall.',
+  'Reinforced rails and electric barbs stop robots too. The wire keeps zapping after a knockdown.'
+ ],
+ soy:[
+  'Tiny soy seeds pepper the raider closest to your coop. Light damage, rapid fire.',
+  'Heavier seeds and a quicker trigger mean more hits before trouble reaches the coop.',
+  'Three flaming seeds per volley. Robots are finally on the menu.'
+ ],
+ fertilizer:[
+  'One crystal skips between up to three neighbors, but it cannot cross an empty stretch.',
+  'Concentrate the mix: stronger hits, faster shots, and a longer hop to the next raider.',
+  'A five-target bomb plants flowers that slow passers for three seconds, robots included.'
+ ],
+ peck:[
+  'Chicken posted a guard with a very busy beak. Quick pecks, short reach.',
+  'Sharper beak, faster jabs. Close visitors get the point.',
+  'A golden beak pecks through robot armor. The short reach still applies.'
+ ],
+ pond:[
+  'Duck douses one raider and splashes nearby company, slowing the whole soggy group.',
+  'Stronger splashes arrive sooner. Crowds get wet in a hurry.',
+  'A full-strength soaking hits and slows robots too. No umbrella helps.'
+ ],
+ honk:[
+  'One honk, one shove. A slow, heavy blast that rattles armor.',
+  'A louder honk lands harder and comes around sooner. Armor loses the argument.',
+  'A thunderclap that shoves robots and cracks their armor.'
+ ]
 };
 const BIRDS:Bird[]=['chicken','duck','goose'];
 const parseSession=():Session|null=>{try{return JSON.parse(localStorage.getItem('coop-session')||'null')}catch{return null}};
@@ -48,7 +72,7 @@ function App(){
  const winner=game?.phase==='results'?[...game.players].sort(ranking)[0]:null;const tied=winner&&(game?.players.filter(p=>score(p)===score(winner!)&&p.waves===winner.waves&&p.kills===winner.kills).length||0)>1;
  return <div className="app">
   <header className="topbar"><div className="brand"><span className="brand-mark">🐣</span><div><strong>COOP DEFENSE</strong><small>Hold the line. Save the eggs.</small></div></div><div className="header-actions"><button className="ghost" onClick={()=>setHelp(true)}>❔ How to play</button>{session&&<button className="ghost" onClick={leave}>Leave room</button>}</div></header>
-  {!session?<main className="landing"><div className="hero"><div className="ribbon">MULTIPLAYER FARM DEFENSE · 2–4 PLAYERS</div><h1>Outfox the foxes.<br/><em>Protect your coop.</em></h1><p>Build a little farm fortress, survive eight waves together, and keep more eggs than your friends.</p><div className="hero-animals">🐔　🦆　🪿 <span>vs</span> 🦊　🐍　🐺</div></div><div className="entry card"><h2>Choose your bird</h2><p>Everyone gets Fence, Soy Seed Lobber, and Fertilizer. Your bird brings one special tower.</p><div className="bird-grid">{BIRDS.map(b=><button key={b} className={`bird-card ${bird===b?'chosen':''}`} onClick={()=>setBird(b)}><span>{ICON[b]}</span><strong>{b}</strong><small>{b==='chicken'?'Fast Peck Post':b==='duck'?'Splash Pond Sprayer':'Heavy Honk Cannon'}</small></button>)}</div><label>Your name<input maxLength={18} value={name} onChange={e=>setName(e.target.value)} placeholder="Farm defender"/></label><button className="primary wide" disabled={busy} onClick={()=>enter('create')}>Create room →</button><div className="or">OR JOIN FRIENDS</div><div className="join"><input aria-label="Room code" maxLength={5} value={code} onChange={e=>setCode(e.target.value.toUpperCase())} placeholder="ROOM CODE"/><button className="secondary" disabled={busy||code.length!==5} onClick={()=>enter('join')}>Join</button></div>{error&&<p className="error">{error}</p>}</div></main>:
+  {!session?<main className="landing"><div className="hero"><div className="ribbon">MULTIPLAYER FARM DEFENSE · 2–4 PLAYERS</div><h1>Outfox the foxes.<br/><em>Protect your coop.</em></h1><p>Build a little farm fortress, survive eight waves together, and keep more eggs than your friends.</p><div className="hero-animals">🐔　🦆　🪿 <span>vs</span> 🦊　🐍　🐺</div></div><div className="entry card"><h2>Choose your bird</h2><p>Every bird can build Fence, Soy Seed Lobber, and Fertilizer. Your bird adds one specialty.</p><div className="bird-grid">{BIRDS.map(b=><button key={b} className={`bird-card ${bird===b?'chosen':''}`} onClick={()=>setBird(b)}><span>{ICON[b]}</span><strong>{b}</strong><small>{b==='chicken'?'Fast Peck Post':b==='duck'?'Splash Pond Sprayer':'Heavy Honk Cannon'}</small></button>)}</div><label>Your name<input maxLength={18} value={name} onChange={e=>setName(e.target.value)} placeholder="Farm defender"/></label><button className="primary wide" disabled={busy} onClick={()=>enter('create')}>Create room →</button><div className="or">OR JOIN FRIENDS</div><div className="join"><input aria-label="Room code" maxLength={5} value={code} onChange={e=>setCode(e.target.value.toUpperCase())} placeholder="ROOM CODE"/><button className="secondary" disabled={busy||code.length!==5} onClick={()=>enter('join')}>Join</button></div>{error&&<p className="error">{error}</p>}</div></main>:
   !game?<main className="loading">🌱 Connecting to room {session.code}… <small>{connection}</small>{error&&<button onClick={leave}>{error} Leave</button>}</main>:
   <main className="game-layout">
    <section className="play-area">
@@ -59,20 +83,20 @@ function App(){
    </section>
    <aside className="sidebar"><div className="card standings"><h2>🏅 Live standings</h2>{[...game.players].sort(ranking).map((p,i)=><div className={`standing ${p.id===me?.id?'self':''}`} key={p.id}><span className="place">{i+1}</span><span className="bird-icon">{ICON[p.bird]}</span><div><strong>{p.name}{p.id===me?.id?' · you':''}</strong><small>{p.eggs===0?'Eliminated':p.connected?'Defending':'Disconnected'} · {p.kills} defeats</small></div><b>🥚 {p.eggs}</b></div>)}</div><div className="card wave-preview"><h2>🌾 Raid report</h2><p>{game.phase==='lobby'?'Get ready for the first raid.':game.phase==='break'?`Next: wave ${game.wave} · ${game.wavePlan[game.wave-1]?.length||0} predators`:`Current: wave ${game.wave} of 8 · ${game.wavePlan[game.wave-1]?.length||0} predators`}</p><div className="enemy-tags">{game.wave>0&&Array.from(new Set((game.wavePlan?.[game.wave-1]||[]).map(e=>`${e.variant} ${e.family}`))).map(s=><span key={s}>{s.includes('machine')?'🤖':s.includes('armored')?'🛡️':'🐾'} {s}</span>)}</div><small>Foxes attack fences · Snakes slither under · Wolves hop over</small></div><div className="card mini-rules"><h2>🐣 The goal</h2><p>Survive for eggs, defeat raiders for points, and save corn for the final score. Every wave gets tougher.</p><button className="text-link" onClick={()=>setHelp(true)}>Read all rules →</button></div></aside>
   </main>}
-  {help&&<div className="modal-backdrop" onClick={()=>setHelp(false)}><div className="modal card" role="dialog" aria-modal="true" aria-label="How to play" onClick={e=>e.stopPropagation()}><button className="modal-close" onClick={()=>setHelp(false)}>✕</button><h1>Defend your coop 🐣</h1><p>Two to four players protect separate lanes against the same randomized raid. Build on the round pads and put fences at the marked crossings. Any player can send the next wave early.</p><div className="rules-grid">
- <div><h3>🥚 Eggs and corn</h3><p>Start with five eggs and 100 corn. Each raider that reaches your coop steals an egg; surviving a wave earns one. Defeats and wave clears earn corn. Fallen fences can be rebuilt between waves.</p></div>
- <div><h3>🏆 Score</h3><p>Each egg is 1,000 points, defeated predators add up to 750, and every unspent corn adds one point. An exact tie is shared. Any player can call a rematch.</p></div>
- <div><h3>🪵 Standard defense: Fence</h3><p>Blocks foxes at one crossing. Snakes slither beneath it and wolves leap over after a pause. Barbed wire hurts and slows passers even while down; Level 3 electric wire affects robots.</p></div>
- <div><h3>🌱 Standard defense: Soy Seed Lobber</h3><p>A quick stream of little seeds. Upgrades add speed and power; Level 3 fires three flaming seeds and can hit robots.</p></div>
- <div><h3>🌼 Standard defense: Fertilizer</h3><p>Crystals bounce to nearby raiders, up to three per shot. Level 3 strikes up to five and leaves a short-lived flower ring that slows anything inside.</p></div>
- <div><h3>🐔 Chicken: Peck Post</h3><p>Fast, close-range single-target pecks. Upgrade its power and speed. Level 3 can hit robots.</p></div>
- <div><h3>🦆 Duck: Pond Sprayer</h3><p>A splash that hits and slows clustered raiders. Higher levels splash harder and faster; Level 3 reaches robots.</p></div>
- <div><h3>🪿 Goose: Honk Cannon</h3><p>Slow, strong blasts shove enemies back and expose armor. Higher levels hit harder; Level 3 reaches robots.</p></div>
- <div><h3>🦊 Foxes</h3><p>The baseline raider. Foxes stop and attack an intact fence until it falls. An armored fox sheds its plating under fire and keeps running.</p></div>
- <div><h3>🐍 Snakes</h3><p>Fast but lighter. A snake pauses at an intact fence, then slithers beneath it. Armored snakes shed their plating and continue as basic snakes.</p></div>
- <div><h3>🐺 Wolves</h3><p>Slow, heavy and hard to stop. A wolf pauses, then hops an intact fence. Armored wolves lose their plating before their basic body can be defeated.</p></div>
- <div><h3>🤖 Robots</h3><p>Machines first arrive in wave 7. Levels 1 and 2 cannot affect them. Only Level 3 defenses work.</p></div>
- <div><h3>🪶 Armored Ostrich</h3><p>Defeats slowly charge one armored runner. Send it during a wave: it sweeps down the lane, pushing regular raiders back without damage. Robots stay in place for two seconds instead.</p></div>
+  {help&&<div className="modal-backdrop" onClick={()=>setHelp(false)}><div className="modal card" role="dialog" aria-modal="true" aria-label="How to play" onClick={e=>e.stopPropagation()}><button className="modal-close" onClick={()=>setHelp(false)}>✕</button><h1>Defend your coop 🐣</h1><p>Every bird guards its own coop against the same eight-wave raid. Build on round pads, fence the marked crossings, and send the next wave early whenever your flock is ready.</p><div className="rules-grid">
+ <div><h3>🥚 Eggs and corn</h3><p>Five eggs, 100 corn, and a long line of hungry visitors. Each predator that reaches the coop steals an egg. Survive a wave to earn one back; defeats and cleared waves pay corn. Rebuild fallen fences between waves.</p></div>
+ <div><h3>🏆 Score</h3><p>Eggs are the big prize: 1,000 points each. Defeats add up to 750, and every corn you keep adds one more. Equal scores go to waves survived, then defeats; a perfect tie shares the win. Anyone can call a rematch.</p></div>
+ <div><h3>🪵 Standard defense: Fence</h3><p>A cheap gate with a serious fox problem. Foxes stop to chew through it; snakes slip under and wolves hop over after a pause. Level 2 barbs hurt and slow regular raiders even after the gate falls. Level 3 electrifies the wire and stops robots too.</p></div>
+ <div><h3>🌱 Standard defense: Soy Seed Lobber</h3><p>An enthusiastic soybean cannon: tiny seeds, lots of them. Level 2 hits harder and fires faster. Level 3 throws three flaming seeds at once, including at robots.</p></div>
+ <div><h3>🌼 Standard defense: Fertilizer</h3><p>One crystal ricochets through up to three neighbors, if they stand close enough to share gossip. Level 2 hits harder and faster. Level 3 becomes a five-target bomb and leaves a three-second flower ring that slows traffic.</p></div>
+ <div><h3>🐔 Chicken: Peck Post</h3><p>Chicken’s answer to unwelcome guests: fast pecks at one nearby target. Each upgrade adds speed and bite; the Level 3 beak can crack robots.</p></div>
+ <div><h3>🦆 Duck: Pond Sprayer</h3><p>Duck douses one raider and splashes nearby company, slowing the group. Upgrades hit harder and come faster; Level 3 can soak robots.</p></div>
+ <div><h3>🪿 Goose: Honk Cannon</h3><p>Goose makes a point with a slow, hefty honk that shoves targets back and weakens armor. Upgrades hit harder and come sooner; Level 3 can budge robots.</p></div>
+ <div><h3>🦊 Foxes</h3><p>Foxes take the straightforward route: stop at a fence and gnaw until it falls. Break an armored fox’s plating and the fox underneath keeps charging.</p></div>
+ <div><h3>🐍 Snakes</h3><p>The fast ones. A snake pauses at a fence, slips underneath, and keeps moving. Break its armor and you still have the snake to deal with.</p></div>
+ <div><h3>🐺 Wolves</h3><p>Big, slow, stubborn. Wolves pause, then hop an intact fence. Break the plating; the wolf underneath is still coming.</p></div>
+ <div><h3>🤖 Robots</h3><p>Wave 7 brings metal versions of every predator. Level 1 and 2 defenses cannot touch them; only Level 3 can. Your armored ostrich can still knock them down for two seconds.</p></div>
+ <div><h3>🪶 Armored Ostrich</h3><p>Defeats charge your armored ostrich. Unleash it during a wave and it barrels down the lane, shoving regular predators backward without hurting them. Ostriches knock robots down for two seconds. No damage, just a very forceful timeout.</p></div>
  </div><button className="primary wide" onClick={()=>setHelp(false)}>Let's defend!</button></div></div>}
  </div>
 }
@@ -89,7 +113,7 @@ function Field({player,game,selection,onSelect,now}:{player:Player;game:Game;sel
  {FENCE_POS.map((x,i)=>{const t=player.towers.find(t=>t.type==='fence'&&t.pad===i),y=laneY(x)*420+30;return <g key={i} onClick={()=>onSelect('fence',i)} className="clickable"><circle cx={35+x*925} cy={y} r="28" fill={selection?.kind==='fence'&&selection.pad===i?'#ffe579':t?'#795b40':'#fff5d5'} stroke="#553f30" strokeWidth="3" strokeDasharray={t?'':'5 5'}/>{t?<TowerSprite type="fence" level={t.level} x={35+x*925} y={y} down={t.hp<=0}/>:<text x={24+x*925} y={y+10} fontSize="29">＋</text>}{t&&<text x={20+x*925} y={y-32} className="field-label">FENCE · {t.hp>0?`L${t.level}`:'DOWN'}</text>}</g>})}
  {PADS.map((x,i)=>{const t=player.towers.find(t=>t.type!=='fence'&&t.pad===i),y=laneY(x)*420+30+(i%2?-73:76);return <g key={i} onClick={()=>onSelect('tower',i)} className="clickable"><circle cx={35+x*925} cy={y} r="30" fill={selection?.kind==='tower'&&selection.pad===i?'#ffe579':t?'#ffedc6':'#e3f5d6'} stroke={t?'#a35e30':'#6e9d70'} strokeWidth="3" strokeDasharray={t?'':'6 5'}/>{t?<TowerSprite type={t.type} level={t.level} x={35+x*925} y={y}/>:<text x={24+x*925} y={y+10} fontSize="30">＋</text>}{t&&<text x={25+x*925} y={y-35} className="field-label">LV {t.level}</text>}</g>})}
  {(game.effects[player.id]||[]).filter(effect=>effect.until>now).map(effect=>{const index=player.towers.find(t=>t.type===effect.type&&PADS[t.pad]===effect.from)?.pad??0;const x1=35+effect.from*925,y1=laneY(effect.from)*420+30+(effect.bounce?0:index%2?-73:76),x2=35+effect.to*925,y2=laneY(effect.to)*420+30;const progress=Math.min(1,(now-effect.at)/320);const colors:Record<string,string>={soy:effect.level===3?'#ff7928':'#b5dc5d',fertilizer:'#e3b2f9',peck:'#ffe06a',pond:'#65ddfa',honk:'#fff59d'};return <g key={effect.id} className="attack-effect"><path d={`M${x1} ${y1} Q${(x1+x2)/2} ${Math.min(y1,y2)-45} ${x2} ${y2}`} fill="none" stroke={colors[effect.type]} strokeWidth={effect.type==='honk'?9:effect.level===3?6:3} opacity={.7*(1-progress)} strokeDasharray={effect.type==='honk'?'10 7':undefined}/><circle cx={x1+(x2-x1)*progress} cy={y1+(y2-y1)*progress-32*Math.sin(Math.PI*progress)} r={effect.type==='fertilizer'&&effect.level===3?12:effect.type==='honk'?11:6} fill={colors[effect.type]} stroke="#fff8d9" strokeWidth="2"/>{effect.type==='soy'&&effect.level===3&&<><circle cx={x1+(x2-x1)*progress-8} cy={y1+(y2-y1)*progress-22*Math.sin(Math.PI*progress)} r="4" fill="#ffa837"/><circle cx={x1+(x2-x1)*progress+8} cy={y1+(y2-y1)*progress-22*Math.sin(Math.PI*progress)} r="4" fill="#ffa837"/></>}</g>})}
- {player.enemies.map((e:Enemy)=>{const x=35+e.x*925,y=laneY(e.x)*420+30;return <g key={e.id} className="enemy-unit" style={{transform:`translate(${x}px, ${y}px)`}}><EnemySprite family={e.family} variant={e.variant} x={0} y={0}/>{e.armorShedAt&&now-e.armorShedAt<650&&<g className="armor-shards"><path d="M-20-17l-14-14-5 15m53-3 15-13 5 15" fill="#bcc9ce" stroke="#52656e" strokeWidth="3" opacity={1-(now-e.armorShedAt)/650}/></g>}{e.stunUntil>now&&<text x="-10" y="-48" fontSize="21">⚡</text>}<rect x="-23" y="-39" width="46" height="6" rx="2" fill="#563b3b"/><rect x="-23" y="-39" width={46*e.hp/e.maxHp} height="6" rx="2" fill="#60d75b"/></g>})}
+ {player.enemies.map((e:Enemy)=>{const x=35+e.x*925,y=laneY(e.x)*420+30;return <g key={e.id} className={`enemy-unit ${e.variant==='machine'&&e.stunUntil>now?'stunned':''}`} style={{transform:`translate(${x}px, ${y}px)`}}><EnemySprite family={e.family} variant={e.variant} x={0} y={0}/>{e.armorShedAt&&now-e.armorShedAt<650&&<g className="armor-shards"><path d="M-20-17l-14-14-5 15m53-3 15-13 5 15" fill="#bcc9ce" stroke="#52656e" strokeWidth="3" opacity={1-(now-e.armorShedAt)/650}/></g>}{e.stunUntil>now&&<text x="-10" y="-48" fontSize="21">⚡</text>}<rect x="-23" y="-39" width="46" height="6" rx="2" fill="#563b3b"/><rect x="-23" y="-39" width={46*e.hp/e.maxHp} height="6" rx="2" fill="#60d75b"/></g>})}
  {player.ostrichUntil>now&&player.ostrichAt>0&&<g className="ostrich-run"><OstrichSprite x={35+Math.min(1,(now-player.ostrichAt)/3200)*925} y={laneY(Math.min(1,(now-player.ostrichAt)/3200))*420+30}/></g>}
  {player.eggs===0&&<g><rect width="1000" height="480" fill="#142b28" opacity=".47"/><text x="500" y="225" textAnchor="middle" fontSize="52" fontWeight="900" fill="white">COOP LOST</text><text x="500" y="270" textAnchor="middle" fontSize="23" fill="white">Watch the remaining flock defend</text></g>}</svg>;
 }

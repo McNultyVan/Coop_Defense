@@ -30,7 +30,7 @@ Foxes are the baseline fence attackers. Fast snakes can slither under an intact 
 
 ## Armored Ostrich
 
-Defeats charge a single armored ostrich. At 100% charge, it can be sent down the path during a wave. The runner deals **no damage**. Each ordinary enemy it crosses is pushed back a medium distance once; each machine stays still for two seconds instead. It takes substantially more defeats to recharge than the original version.
+Defeats charge a single armored ostrich. At 100% charge, it can be sent down the path during a wave. The runner deals **no damage**. Each ordinary enemy it crosses is pushed back a medium distance once; each machine is knocked down for two seconds instead. It takes substantially more defeats to recharge than the original version.
 
 ## Score and rematch
 
