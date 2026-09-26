@@ -68,7 +68,9 @@ function App(){
  <div><h3>🐔 Chicken: Peck Post</h3><p>Fast, close-range single-target pecks. Upgrade its power and speed. Level 3 can hit robots.</p></div>
  <div><h3>🦆 Duck: Pond Sprayer</h3><p>A splash that hits and slows clustered raiders. Higher levels splash harder and faster; Level 3 reaches robots.</p></div>
  <div><h3>🪿 Goose: Honk Cannon</h3><p>Slow, strong blasts shove enemies back and expose armor. Higher levels hit harder; Level 3 reaches robots.</p></div>
- <div><h3>🦊 Foxes, 🐍 snakes and 🐺 wolves</h3><p>Foxes stop at fences. Snakes move fast and slither under; wolves are tough and hop over. Each has basic, armored and machine versions. An armored raider sheds its armor when worn down and continues as a basic one.</p></div>
+ <div><h3>🦊 Foxes</h3><p>The baseline raider. Foxes stop and attack an intact fence until it falls. An armored fox sheds its plating under fire and keeps running.</p></div>
+ <div><h3>🐍 Snakes</h3><p>Fast but lighter. A snake pauses at an intact fence, then slithers beneath it. Armored snakes shed their plating and continue as basic snakes.</p></div>
+ <div><h3>🐺 Wolves</h3><p>Slow, heavy and hard to stop. A wolf pauses, then hops an intact fence. Armored wolves lose their plating before their basic body can be defeated.</p></div>
  <div><h3>🤖 Robots</h3><p>Machines first arrive in wave 7. Levels 1 and 2 cannot affect them. Only Level 3 defenses work.</p></div>
  <div><h3>🪶 Armored Ostrich</h3><p>Defeats slowly charge one armored runner. Send it during a wave: it sweeps down the lane, pushing regular raiders back without damage. Robots stay in place for two seconds instead.</p></div>
  </div><button className="primary wide" onClick={()=>setHelp(false)}>Let's defend!</button></div></div>}
