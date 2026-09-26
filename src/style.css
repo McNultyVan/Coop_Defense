@@ -50,3 +50,15 @@
 @media(max-width:440px){.build-options{grid-template-columns:1fr}.build-option{min-height:0}.upgrade-action{max-width:none}}
 @media(prefers-reduced-motion:reduce){.enemy-unit{transition:none}}
 .enemy-unit.stunned .enemy-sprite{transform:rotate(72deg) translateY(10px);transform-origin:0 0;transition:transform 180ms ease-out}
+
+.rules-grid .rules-card.standard{background:#eaf4dd;border-left-color:#6ba74b}
+.rules-grid .rules-card.special{background:#fff0cf;border-left-color:#e8a23d}
+.rules-grid .rules-card.predator{background:#f7e7df;border-left-color:#cf7657}
+.rules-grid .rules-card.robot{background:#e6ebf1;border-left-color:#6d839b}
+.rules-grid .rules-card.power{background:#efe5fa;border-left-color:#9b74c5}
+.rules-grid .rules-card.economy{background:#f7f0d9;border-left-color:#d5aa49}
+.repair-note{width:100%;color:#a4572f!important;font-weight:800}
+.gold-shimmer{animation:goldGlint 1.4s ease-in-out infinite alternate;filter:drop-shadow(0 0 5px #ffe368)}
+@keyframes goldGlint{from{opacity:.38;transform:scale(.78)}to{opacity:1;transform:scale(1.16)}}
+.splash-effect circle{filter:drop-shadow(0 0 10px #f4b5ff)}
+@media(prefers-reduced-motion:reduce){.gold-shimmer{animation:none}}

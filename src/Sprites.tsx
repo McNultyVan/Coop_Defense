@@ -1,12 +1,13 @@
 import type {Family,Variant,TowerType} from './game';
-export function EnemySprite({family,variant,x,y}:{family:Family;variant:Variant;x:number;y:number}){
- const robot=variant==='machine',armor=variant==='armored',metal=robot?'#778fa5':armor?'#b2a69b':'';
+export function EnemySprite({family,variant,x,y,goldArmor=false}:{family:Family;variant:Variant;x:number;y:number;goldArmor?:boolean}){
+ const robot=variant==='machine',armor=variant==='armored',metal=robot?'#778fa5':armor?(goldArmor?'#f4c845':'#b2a69b'):'';
  return <g transform={`translate(${x} ${y})`} className={`enemy-sprite enemy-${family} ${robot?'robot':''}`}>
   <ellipse cy="15" rx="24" ry="7" fill="#3b563a" opacity=".25"/>
   {robot&&<><circle r="28" fill="#91adbc" stroke="#445965" strokeWidth="3"/><path d="M-28 0h-8m8-12h-7m7 24h-7M28 0h8m-8-12h7m-7 24h7" stroke="#617988" strokeWidth="5"/><circle cx="0" cy="-26" r="5" fill="#65d9ef"/></>}
   {family==='snake'?<><path d="M-21 12 Q-31 -11 -11 -14 Q6 -17 1 2 Q0 13 14 7 L23 -5" fill="none" stroke={robot?'#334e5a':'#205e44'} strokeWidth="15" strokeLinecap="round"/><path d="M-21 12 Q-31 -11 -11 -14 Q6 -17 1 2 Q0 13 14 7 L23 -5" fill="none" stroke={robot?'#9cc5cc':'#67b970'} strokeWidth="10" strokeLinecap="round"/><circle cx="21" cy="-7" r="9" fill={robot?'#9cc5cc':'#69c575'}/><circle cx="24" cy="-10" r="2.5" fill={robot?'#f15d65':'#263e2a'}/><path d="M28 -4l8 3" stroke="#d75265" strokeWidth="2"/></>:
   <><path d="M-19 -8 L-19 -28 L-6 -18 L11 -19 L25 -29 L22 -3" fill={robot?'#7b91a1':family==='fox'?'#c56d3e':'#767b82'} stroke="#35464a" strokeWidth="2"/><ellipse cx="2" cy="2" rx="25" ry="19" fill={robot?'#9ab2bd':family==='fox'?'#ee9650':'#92959a'} stroke="#4c594e" strokeWidth="2"/><path d="M-14 4 Q2 24 18 3 L10 2 L3 9 L-6 1Z" fill={robot?'#d9e6e5':'#f5e4ca'}/><circle cx="-8" cy="-5" r="2.8" fill={robot?'#f25859':'#25332d'}/><circle cx="12" cy="-5" r="2.8" fill={robot?'#f25859':'#25332d'}/><ellipse cx="3" cy="9" rx="4.2" ry="3" fill="#473b38"/>{family==='wolf'&&<path d="M-16 14l-8 8m38-5 8 6" stroke="#62676e" strokeWidth="6" strokeLinecap="round"/>}</>}
-  {armor&&<><path d="M-20 -14 Q1 -28 22 -14 L17 0 Q3 -5 -17 0Z" fill={metal} stroke="#53626b" strokeWidth="2"/><path d="M-10 -18h25" stroke="#e1d7c8" strokeWidth="3"/></>}
+  {armor&&<><path d="M-20 -14 Q1 -28 22 -14 L17 0 Q3 -5 -17 0Z" fill={metal} stroke={goldArmor?"#a57218":"#53626b"} strokeWidth="2"/><path d="M-10 -18h25" stroke={goldArmor?"#fff6b5":"#e1d7c8"} strokeWidth="3"/></>}
+  {goldArmor&&armor&&<g className="gold-shimmer"><path d="M-26 -30l3-8 3 8 8 3-8 3-3 8-3-8-8-3Zm47 8 2-6 2 6 6 2-6 2-2 6-2-6-6-2Z" fill="#fff5a7"/></g>}
   {robot&&<path d="M-14 15h32m-27 4h22" stroke="#456477" strokeWidth="3"/>}
  </g>;
 }
@@ -26,7 +27,7 @@ export function TowerSprite({type,level,x,y,down=false}:{type:TowerType;level:nu
  </g>;
 }
 export function OstrichSprite({x,y}:{x:number;y:number}){
- return <g transform={`translate(${x} ${y})`} className="ostrich-sprite" pointerEvents="none">
+ return <g transform={`translate(${x} ${y}) scale(-1 1)`} className="ostrich-sprite" pointerEvents="none">
   <path d="M-62 9h-21m26 10h-18m31-28h-23" stroke="#f8eec3" strokeWidth="6" strokeLinecap="round" opacity=".8"/>
   <ellipse cx="0" cy="10" rx="34" ry="24" fill="#e8dec6" stroke="#53686d" strokeWidth="3"/>
   <path d="M-12 20q-25 20-36-8m40 15-6 23m25-21 12 21" fill="none" stroke="#997759" strokeWidth="7" strokeLinecap="round"/>

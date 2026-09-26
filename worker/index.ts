@@ -1,5 +1,5 @@
 import { DurableObject } from "cloudflare:workers";
-import {Game, Bird, TowerType, makePlayer, makeWaves, place, upgrade, rebuild, tick} from '../src/game';
+import {Game, Bird, TowerType, makePlayer, makeWaves, place, upgrade, rebuild, beginWave, tick} from '../src/game';
 interface Env {ROOMS:DurableObjectNamespace<GameRoom>;ASSETS:Fetcher}
 const json=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json','cache-control':'no-store'}});
 const codeOf=()=>Array.from(crypto.getRandomValues(new Uint8Array(5)),b=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[b%32]).join('');
@@ -82,7 +82,7 @@ export class GameRoom extends DurableObject<Env>{
    g.phase='break';g.wave=1;g.nextAt=0;g.message='Build your defenses. Any bird can start wave 1!';changed=true;this.startLoop();
   }
   if(type==='launch'&&g.phase==='break'&&p.eggs>0){
-   g.phase='wave';g.spawnIndex=0;g.nextSpawnAt=Date.now()+600;g.message=`${p.name} started the raid!`;changed=true;
+   beginWave(g,Date.now());g.message=`${p.name} started the raid!`;changed=true;
   }
   if(type==='rematch'&&g.phase==='results'){
    g.phase='lobby';g.wave=0;g.nextAt=0;g.spawnIndex=0;g.enemyId=1;g.message=`${p.name} called a rematch. Pick birds and ready up.`;g.notice=null;g.effects={};g.wavePlan=makeWaves(crypto.getRandomValues(new Uint32Array(1))[0]);
@@ -92,7 +92,7 @@ export class GameRoom extends DurableObject<Env>{
   if((g.phase==='break'||g.phase==='wave')&&p.eggs>0){
    if(type==='place'&&typeof command.tower==='string'&&Number.isInteger(command.pad))changed=place(p,command.tower as TowerType,command.pad as number);
    if(type==='upgrade'&&typeof command.tower==='string'&&Number.isInteger(command.pad))changed=upgrade(p,command.tower as TowerType,command.pad as number);
-   if(type==='rebuild'&&Number.isInteger(command.pad))changed=rebuild(p,command.pad as number,g.phase);
+   if(type==='rebuild'&&Number.isInteger(command.pad))changed=rebuild(p,command.pad as number,g.phase,g.wave);
    if(type==='ostrich'&&g.phase==='wave'&&p.charge>=100&&Date.now()>=p.ostrichUntil){p.charge=0;p.ostrichAt=Date.now();p.ostrichUntil=p.ostrichAt+3200;changed=true;}
   }
   if(changed){await this.save();this.broadcast();}
