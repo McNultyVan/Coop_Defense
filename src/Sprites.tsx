@@ -22,6 +22,6 @@ export function TowerSprite({type,level,x,y,down=false}:{type:TowerType;level:nu
   {type==='pond'&&<><ellipse cx="0" cy="5" rx="17" ry="14" fill="#d4f4f4"/><path d="M-17 -7 Q0 -25 16 -8 L18 5 Q0 17 -17 5Z" fill="#71c5d9"/><circle cx="1" cy="-12" r="3" fill="#294b59"/><path d="M13 -6l15 6-15 4" fill="#edb861"/>{level===3&&<circle r="19" fill="none" stroke="#acf0f3" strokeWidth="3"/>}</>}
   {type==='honk'&&<><ellipse cx="-2" cy="6" rx="16" ry="13" fill="#f4f6e7"/><path d="M4 1Q-2 -29 10 -28Q21 -28 14 2" fill="#f4f6e7"/><path d="M14 -19l16 6-16 5" fill="#e7a251"/><circle cx="10" cy="-23" r="2" fill="#2b3e42"/>{level>=2&&<path d="M23 -28q16 10 0 20m5-27q22 13 0 27" fill="none" stroke="#f5e88b" strokeWidth="3"/>}</>}
   </>}
-  {type!=='fence'&&<><rect x="-14" y="23" width="28" height="11" rx="5" fill="#244c40"/><text y="31" textAnchor="middle" fontSize="8" fontWeight="900" fill="#fff">LV {level}</text></>}
+  {type!=='fence'&&level>=2&&<><path d="M-22 16 Q0 29 22 16" fill="none" stroke={level===3?'#ffde5a':'#d5e5a1'} strokeWidth={level===3?5:3}/><circle cx="-22" cy="-16" r={level===3?5:3} fill={level===3?'#ffe371':'#e2f5b3'}/><circle cx="22" cy="-16" r={level===3?5:3} fill={level===3?'#ffe371':'#e2f5b3'}/></>}{type!=='fence'&&<><rect x="-14" y="23" width="28" height="11" rx="5" fill="#244c40"/><text y="31" textAnchor="middle" fontSize="8" fontWeight="900" fill="#fff">LV {level}</text></>}
  </g>;
 }

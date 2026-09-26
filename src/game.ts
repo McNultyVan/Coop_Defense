@@ -6,7 +6,7 @@ export type Phase = 'lobby'|'break'|'wave'|'results';
 export interface Tower {type:TowerType; level:1|2|3; pad:number; hp:number; cooldown:number}
 export interface Enemy {id:number; family:Family; variant:Variant; x:number; hp:number; maxHp:number; speed:number; fencePause:number; fenceIndex:number; slowUntil:number; armorBreakUntil:number; hitFenceAt:number}
 export interface Flower {x:number; until:number}
-export interface Effect {id:number;type:TowerType;from:number;to:number;at:number;until:number;level:number}
+export interface Effect {id:number;type:TowerType;from:number;to:number;at:number;until:number;level:number;bounce?:boolean}
 export interface Player {id:string; name:string; bird:Bird; ready:boolean; connected:boolean; eggs:number; corn:number; charge:number; ostrichUntil:number; kills:number; killPoints:number; waves:number; towers:Tower[]; enemies:Enemy[]; flowers:Flower[]}
 export interface Game {code:string; phase:Phase; host:string; players:Player[]; wave:number; nextAt:number; spawnIndex:number; nextSpawnAt:number; enemyId:number; revision:number; message:string; notice:{text:string;until:number}|null; wavePlan:WaveEntry[][]; effects:Record<string,Effect[]>; updatedAt:number}
 export interface WaveEntry {family:Family;variant:Variant}
@@ -131,7 +131,7 @@ export function tick(game:Game,dt:number,now:number){
     let from=target;const seen=new Set([target.id]);
     for(let k=1;k<(t.level===3?5:3);k++){
      const next=p.enemies.filter(e=>e.hp>0&&!seen.has(e.id)&&(e.variant!=='machine'||t.level===3)&&Math.abs(e.x-from.x)<(t.level>=2?.075:.055)).sort((a,b)=>Math.abs(a.x-from.x)-Math.abs(b.x-from.x))[0];
-     if(!next)break;strike(next,.75);seen.add(next.id);from=next;
+     if(!next)break;strike(next,.75);game.effects[p.id].push({id:game.enemyId++,type:t.type,from:from.x,to:next.x,at:now,until:now+480,level:t.level,bounce:true});seen.add(next.id);from=next;
     }
     if(t.level===3)p.flowers.push({x:target.x,until:now+3000});
    }

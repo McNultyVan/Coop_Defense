@@ -1,6 +1,6 @@
 # Coop Defense
 
-A touch-friendly, 2–4 player farm tower defense game. Each player protects a separate coop against equivalent waves. Eggs decide the winner.
+A touch-friendly, 2–4 player farm tower defense game. Each player protects a separate coop against the same randomized wave plan. Eggs decide the winner.
 
 ## Local development
 
@@ -18,7 +18,7 @@ No secrets or environment variables are required. Room codes and reconnect token
 
 ## Deployment
 
-The repository includes `wrangler.jsonc`: a single Cloudflare Worker serves assets and one SQLite-backed Durable Object per room. Connect the GitHub repository in Cloudflare Workers Builds, set build command `npm run build` and deploy command `npx wrangler deploy`. The production URL is the assigned `workers.dev` domain. Alternatively, authenticate Wrangler and run `npm run deploy`. Cloudflare account authorization is required for public deployment. Never commit local tokens.
+The repository includes `wrangler.jsonc`: a single Cloudflare Worker serves assets and one SQLite-backed Durable Object per room. Connect the GitHub repository in Cloudflare Workers Builds, set build command `npm run build` and deploy command `npx wrangler deploy`. The live game is [coop-defense.mcnultyvan.workers.dev](https://coop-defense.mcnultyvan.workers.dev/). Alternatively, authenticate Wrangler and run `npm run deploy`. Cloudflare account authorization is required for public deployment. Never commit local tokens.
 
 ## Architecture
 
@@ -28,4 +28,4 @@ See [GAME_SPEC.md](docs/GAME_SPEC.md) for rules and [PLAN.md](docs/PLAN.md) for 
 
 ## Current status
 
-The local build and room smoke check work. Publishing requires creating a new GitHub repository, uploading this source, and connecting it in a Cloudflare Workers account. See [PLAN.md](docs/PLAN.md) for the outstanding production gate and known issues.
+The game is deployed through GitHub-connected Cloudflare Workers Builds. The initial feedback pass added harder waves, true tied ranks, rematches from any player, manual launch of wave 1, a larger lane, attack effects, and distinct sprite upgrades. See [PLAN.md](docs/PLAN.md) for known limits and [ASSETS.md](docs/ASSETS.md) for art licensing.
