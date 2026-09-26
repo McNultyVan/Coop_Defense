@@ -1,18 +1,18 @@
-# Coop Defense — proposed game specification and implementation plan
+# Coop Defense — game specification
 
-**Status:** Awaiting initial approval. No game code or repository has been created.
+**Status:** Implemented; balance and presentation updated after the first public playtest.
 
 ## Goal and current state
 
-Build a public, touch-friendly, 2–4 player competitive tower defense game. Players defend separate coops against equivalent simultaneous waves, then compare eggs and scores. The workspace currently contains only the supplied starter prompt; no game implementation or repository was present.
+Build a public, touch-friendly, 2–4 player competitive tower defense game. Players defend separate coops against equivalent simultaneous waves, then compare eggs and scores. The source is in the Coop_Defense GitHub repository and deploys to Cloudflare Workers.
 
 ## Proposed rules
 
 1. A host creates a five-character room code. Two to four players join, enter names, choose Chicken, Duck, or Goose (duplicates allowed), and ready up. The host starts when at least two are ready; all joined players must be ready.
-2. Each player has an equivalent winding lane, eight fixed attack-tower pads, three separate fence anchors, five starting eggs, and 100 starting corn. **Every player can build Fence, Soy Seed Lobber, and Fertilizer; their bird adds a fourth, unique defense.** Every available tower costs at most 100 corn at level 1, so a player can always afford at least one starter tower. All players face the same wave schedule, with independent enemies, towers, economy, eggs, and score.
+2. Each player has an equivalent winding lane, eight attack-tower pads, three separate fence anchors, five starting eggs, and 100 starting corn. **Every player can build Fence, Soy Seed Lobber, and Fertilizer; their bird adds a fourth, unique defense.** Every available tower costs at most 100 corn at level 1, so a player can always afford at least one starter tower. All players face the same wave schedule, with independent enemies, towers, economy, eggs, and score.
 3. Tap an empty pad or fence anchor to build; tap a defense to upgrade it from level 1 to 2 to 3. Attack towers can be placed and upgraded during waves or breaks. Fence rebuilding is a separate paid action available **only between waves**. No selling in the first release. The cost displayed on each action is authoritative; unaffordable actions are disabled.
 4. Every predator that reaches the coop removes one egg. Eggs stop at zero. Zero eggs eliminates the player; their lane freezes, while they can watch standings and remaining lanes. Each active player that survives an entire wave gains one egg and a corn completion bonus. Defeating enemies earns corn.
-5. Eight finite waves end in results. If every player is eliminated earlier, results appear immediately. Players can see live standings but cannot affect another lane. The results show score, eggs, kills, waves survived, and elimination. Players can ready for a rematch in the same room with fresh resources and the option to change birds.
+5. Eight finite waves end in results. If every player is eliminated earlier, results appear immediately. Players can see live standings but cannot affect another lane. The results show score, eggs, kills, waves survived, and elimination. Any player can request a rematch in the same room with fresh resources and the option to change birds.
 
 ### Shared defenses and provisional economy
 
@@ -50,9 +50,9 @@ There are **three ranked predator families**, each with **Basic, Armored, and Ma
 | 2 | Snake | Faster, lighter; slithers under eligible fences after a brief pause. | More health and damage reduction, still slithers. | Fast robot snake; can slither after a brief pause at eligible fences. |
 | 3 | Wolf | Slow, high-health threat; hops an eligible fence after a longer pause. | More health and damage reduction, still hops. | Heavy robot wolf; can hop after a longer pause at eligible fences. |
 
-**Version order within each family: Basic < Armored < Machine.** Armor reduces incoming eligible damage. Machine predators are immune to **every level 1 or 2 defense and its secondary effects**, including Ostrich-boosted attacks, slow, knockback, armor break, low-level wire, and low-level fence blocking. Only level 3 towers and level 3 electric fences affect them. This rule appears persistently near the wave and tower controls as **“ROBOTS: Only Level 3 defenses work”**, on machine enemy cards, and in the level 1–2 tower details. Incoming-machine wave previews call it out before the first machine wave.
+**Version order within each family: Basic < Armored < Machine.** Armor reduces incoming eligible damage. Machine predators are immune to **every level 1 or 2 defense and its secondary effects**, including Ostrich-boosted attacks, slow, knockback, armor break, low-level wire, and low-level fence blocking. Only level 3 towers and level 3 electric fences affect them. The robot immunity warning first appears on wave 7 and remains visible during robot waves.
 
-Waves 1–2 introduce basic foxes and snakes; 3–4 add wolves and armored versions; 5–6 mix the three families and give players time to build level 3 defenses; **machines first appear in wave 7**; wave 8 is a final mixed raid with more machines. The upcoming enemy mix is shown during each break. One common server schedule drives identical composition for every lane. Approximate targets: 25–65 seconds of spawning, up to about 90 seconds including cleanup per normal wave, an 8-second break, and about **8–11 minutes** for a complete match. A wave ends when spawning finishes and all surviving lanes have cleared or leaked their enemies. No endless mode or separate boss system.
+Waves 1–2 introduce basic foxes and snakes; 3–4 add wolves and armored versions; 5–6 mix the three families and give players time to build level 3 defenses; **machines first appear in wave 7**; wave 8 is a final mixed raid with more machines. The upcoming enemy mix is shown during each break. One server-generated, constrained random schedule drives identical composition for every lane in a match. Wave size, armor, and machines increase with wave number. The first wave waits for any player to launch it; later waves begin automatically after a 12-second build break. Approximate targets: 25–65 seconds of spawning, up to about 90 seconds including cleanup per normal wave, a 12-second break, and about **6–9 minutes** for a complete match. A wave ends when spawning finishes and all surviving lanes have cleared or leaked their enemies. No endless mode or separate boss system.
 
 ### Ostrich rush
 
@@ -60,18 +60,18 @@ Kills fill a visible meter; every earned 100 charge grants one activation, with 
 
 ### Scoring and ties
 
-**Score = 1,000 × eggs remaining + min(250, weighted kills).** Basic / armored / machine versions award 1 / 2 / 3 kill points for foxes, 2 / 3 / 4 for snakes, and 3 / 4 / 5 for wolves. The 250-point cap ensures **one egg outweighs any difference in kills**. Waves survived appears in the breakdown and acts as a tie-breaker after score, then total predator defeats; a remaining exact tie is shared. Egg counts are never negative. No hidden multiplier or survival bonus is added to the score.
+**Score = 1,000 × eggs remaining + min(750, weighted kills).** Basic / armored / machine versions award 1 / 2 / 3 kill points for foxes, 2 / 3 / 4 for snakes, and 3 / 4 / 5 for wolves. The 750-point cap ensures **one egg outweighs any difference in kills**. Waves survived appears in the breakdown and acts as a tie-breaker after score, then total predator defeats; a remaining exact tie is shared. Egg counts are never negative. No hidden multiplier or survival bonus is added to the score.
 
 ## Multiplayer and deployment architecture
 
-- **Frontend:** TypeScript, React, Vite, and code-drawn SVG/CSS game elements. Responsive touch controls with a scrollable lane view on narrow portrait phones; landscape is recommended, never required. No artwork license or heavy asset pipeline is needed.
+- **Frontend:** TypeScript, React, Vite, and original SVG sprites and a CC0 farm-ground tile. Responsive touch controls with a scrollable lane view on narrow portrait phones; landscape is recommended, never required. No artwork license or heavy asset pipeline is needed.
 - **Backend:** One Cloudflare Worker serves the built static assets and routes room requests/WebSockets to one **SQLite-backed Durable Object per room**. This object owns membership, validated commands, wave timing, simulation, fences and rebuilds, eggs, economy, score, and final results. Clients render server snapshots and send intents such as place, upgrade, rebuild, ready, and activate. They do not determine damage or scores.
 - **Synchronization:** Server-timestamped match start and regular state broadcasts during active waves. The room object advances the simulation at a modest fixed rate, saves recoverable match state periodically and on major transitions, and hibernates outside active matches. A reconnect token stored in the browser reclaims the same seat after refresh; disconnected players' lanes continue automatically. A player who loses their token cannot reclaim a seat mid-match. Room codes expire after a documented idle period; spectator behavior is for eliminated room members, without a public viewer link.
 - **Source and delivery:** A new GitHub repository is the source of truth, with `README.md`, `docs/GAME_SPEC.md`, and `docs/PLAN.md`. Cloudflare Workers Builds connects to GitHub and deploys a single Worker plus static assets to a public `workers.dev` URL; no ChatGPT Sites. Repository and account connection are setup steps after approval. A Cloudflare account and GitHub authorization will be needed for production; no paid plan is assumed. Cloudflare currently supports [SQLite-backed Durable Objects on Workers Free](https://developers.cloudflare.com/durable-objects/platform/pricing/), [static assets alongside a Worker](https://developers.cloudflare.com/workers/static-assets/), and [GitHub-connected Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/). Free quotas still apply.
 
 [Vercel offers WebSockets in beta](https://vercel.com/docs/functions/websockets), but its function instances do not share room state by themselves and need a separate durable store/coordinator. A single Durable Object per room therefore keeps this project simpler even though it changes the preferred host from Vercel.
 
-## Execution plan
+## Original execution plan
 
 | Phase | Integrated outcome and deliverable | Only necessary check / gate |
 | --- | --- | --- |

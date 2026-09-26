@@ -1,20 +1,19 @@
 # Coop Defense execution status
 
-## Completed locally
+## Completed
 
-- React/Vite frontend and responsive SVG lane with touch-first pad selection.
-- Cloudflare Worker with one authoritative Durable Object per room: create/join, bird selection, ready, synchronized start, live standings, reconnect tokens, spectator state, and host rematch.
-- Eight-wave match: three shared defenses plus each bird's special, levels 1–3, fences and paid break-only rebuilding, nine enemy combinations, machine immunity, eggs, corn, Ostrich Rush, scoring, results, and rules.
-- Integrated local checks: production build; two independent WebSocket clients joining and starting the same room; tower placement and matching wave state; deterministic full eight-wave simulation and a provisional balance pass for all three birds.
+- Public GitHub source and Cloudflare Worker with room Durable Objects and static frontend.
+- Shared randomized eight-wave plan per match, synchronized for each player; the host begins the match and any player can launch wave 1. Later waves start after a 12-second break.
+- Three common towers and a bird-specific fourth, predator families and variants, paid fence rebuilding, machine immunity, economy, score, Ostrich Rush, and results.
+- Larger tactical lane, CC0 grass tile, original level-specific tower and predator sprites, visible attack effects, final-five-second flashing countdown, nonblocking wave-clear toast, contextual robot warning, true tied ranks, and rematch requested by any player.
+- TypeScript production build and scripted full-match simulation; two-client local room protocol smoke check completed during initial implementation.
 
-## Current gate: GitHub and public deployment
+## Current gate
 
-The local project is ready to publish. The available GitHub connection exposes repository content operations but cannot create a new repository. A new GitHub repository and Cloudflare Workers GitHub connection are required before a public URL can be issued. No hosting account credentials are in the source.
+Push the updated source and verify the Cloudflare GitHub build and public deployment. Then check a two-player rematch and wave start in production.
 
-## Known issues and deferred validation
+## Known limits
 
-- **IMPORTANT:** Public deployment and independent-device production check remain pending account setup.
-- **IMPORTANT:** A match can pause while every player is disconnected and the room object has no active timer; a reconnect resumes the room. Production behavior needs checking.
-- **MINOR:** Balance numbers and total match time are provisional; the game gate used a scripted tower-building sequence.
-- **MINOR:** SVG art uses emoji glyphs, whose appearance varies by platform.
-- **MINOR:** Idle rooms are not automatically deleted yet. Room codes cannot be reused while their stored state exists.
+- Match difficulty still depends on player build choices. This balance pass increases wave sizes and late composition, but live player feedback may lead to another tuning pass.
+- If all clients disconnect during a running match, the room may pause until one reconnects.
+- Idle rooms are not automatically deleted; codes stay reserved.

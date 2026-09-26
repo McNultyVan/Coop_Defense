@@ -1,5 +1,5 @@
 import { DurableObject } from "cloudflare:workers";
-import {Game, Bird, TowerType, makePlayer, place, upgrade, rebuild, tick, ranking} from '../src/game';
+import {Game, Bird, TowerType, makePlayer, makeWaves, place, upgrade, rebuild, tick} from '../src/game';
 interface Env {ROOMS:DurableObjectNamespace<GameRoom>;ASSETS:Fetcher}
 const json=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json','cache-control':'no-store'}});
 const codeOf=()=>Array.from(crypto.getRandomValues(new Uint8Array(5)),b=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[b%32]).join('');
@@ -40,7 +40,7 @@ export class GameRoom extends DurableObject<Env>{
  private loop:ReturnType<typeof setInterval>|null=null;
  private last=Date.now();
  private lastSave=0;
- constructor(ctx:DurableObjectState,env:Env){super(ctx,env);ctx.blockConcurrencyWhile(async()=>{this.game=await ctx.storage.get<Game>('game')||null;this.seats=await ctx.storage.get<Record<string,string>>('seats')||{};});}
+ constructor(ctx:DurableObjectState,env:Env){super(ctx,env);ctx.blockConcurrencyWhile(async()=>{this.game=await ctx.storage.get<Game>('game')||null;this.seats=await ctx.storage.get<Record<string,string>>('seats')||{};if(this.game){this.game.wavePlan ||= makeWaves(crypto.getRandomValues(new Uint32Array(1))[0]);this.game.effects ||= {};this.game.notice ||= null;}});}
  private async save(){if(this.game){this.game.updatedAt=Date.now();await this.ctx.storage.put({game:this.game,seats:this.seats});this.lastSave=Date.now();}}
  private broadcast(){if(!this.game)return;this.game.revision++;const data=JSON.stringify({type:'state',game:this.game,serverTime:Date.now()});for(const ws of this.ctx.getWebSockets())try{ws.send(data)}catch{}}
  private startLoop(){if(this.loop||!this.game||!['break','wave'].includes(this.game.phase))return;
@@ -51,7 +51,7 @@ export class GameRoom extends DurableObject<Env>{
    if(this.game)return json({error:'Code already used'},409);
    const b=await req.json() as {code:string;token:string;name:string;bird:Bird};
    const id=crypto.randomUUID();this.seats[b.token]=id;
-   this.game={code:b.code,phase:'lobby',host:id,players:[makePlayer(id,b.name.trim(),b.bird)],wave:0,nextAt:0,spawnIndex:0,nextSpawnAt:0,enemyId:1,revision:0,message:'Invite friends to your coop!',updatedAt:Date.now()};
+   this.game={code:b.code,phase:'lobby',host:id,players:[makePlayer(id,b.name.trim(),b.bird)],wave:0,nextAt:0,spawnIndex:0,nextSpawnAt:0,enemyId:1,revision:0,message:'Invite friends to your coop!',notice:null,wavePlan:makeWaves(crypto.getRandomValues(new Uint32Array(1))[0]),effects:{},updatedAt:Date.now()};
    await this.save();return json({code:b.code,token:b.token});
   }
   if(url.pathname==='/join'){
@@ -79,10 +79,13 @@ export class GameRoom extends DurableObject<Env>{
   if(type==='ready'&&g.phase==='lobby'){p.ready=Boolean(command.ready);changed=true;}
   if(type==='bird'&&g.phase==='lobby'&&validBird(command.bird)){p.bird=command.bird;p.ready=false;changed=true;}
   if(type==='start'&&g.phase==='lobby'&&g.host===p.id&&g.players.length>=2&&g.players.every(p=>p.ready)){
-   g.phase='break';g.wave=1;g.nextAt=Date.now()+15000;g.message='Build your first defenses!';changed=true;this.startLoop();
+   g.phase='break';g.wave=1;g.nextAt=0;g.message='Build your defenses. Any bird can start wave 1!';changed=true;this.startLoop();
   }
-  if(type==='rematch'&&g.phase==='results'&&g.host===p.id){
-   g.phase='lobby';g.wave=0;g.nextAt=0;g.spawnIndex=0;g.enemyId=1;g.message='Rematch! Pick birds and ready up.';
+  if(type==='launch'&&g.phase==='break'&&g.wave===1&&p.eggs>0){
+   g.phase='wave';g.spawnIndex=0;g.nextSpawnAt=Date.now()+600;g.message=`${p.name} started the raid!`;changed=true;
+  }
+  if(type==='rematch'&&g.phase==='results'){
+   g.phase='lobby';g.wave=0;g.nextAt=0;g.spawnIndex=0;g.enemyId=1;g.message=`${p.name} called a rematch. Pick birds and ready up.`;g.notice=null;g.effects={};g.wavePlan=makeWaves(crypto.getRandomValues(new Uint32Array(1))[0]);
    g.players=g.players.map(x=>({...makePlayer(x.id,x.name,x.bird),connected:x.connected}));
    changed=true;
   }

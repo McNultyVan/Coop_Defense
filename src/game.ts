@@ -6,8 +6,10 @@ export type Phase = 'lobby'|'break'|'wave'|'results';
 export interface Tower {type:TowerType; level:1|2|3; pad:number; hp:number; cooldown:number}
 export interface Enemy {id:number; family:Family; variant:Variant; x:number; hp:number; maxHp:number; speed:number; fencePause:number; fenceIndex:number; slowUntil:number; armorBreakUntil:number; hitFenceAt:number}
 export interface Flower {x:number; until:number}
+export interface Effect {id:number;type:TowerType;from:number;to:number;at:number;until:number;level:number}
 export interface Player {id:string; name:string; bird:Bird; ready:boolean; connected:boolean; eggs:number; corn:number; charge:number; ostrichUntil:number; kills:number; killPoints:number; waves:number; towers:Tower[]; enemies:Enemy[]; flowers:Flower[]}
-export interface Game {code:string; phase:Phase; host:string; players:Player[]; wave:number; nextAt:number; spawnIndex:number; nextSpawnAt:number; enemyId:number; revision:number; message:string; updatedAt:number}
+export interface Game {code:string; phase:Phase; host:string; players:Player[]; wave:number; nextAt:number; spawnIndex:number; nextSpawnAt:number; enemyId:number; revision:number; message:string; notice:{text:string;until:number}|null; wavePlan:WaveEntry[][]; effects:Record<string,Effect[]>; updatedAt:number}
+export interface WaveEntry {family:Family;variant:Variant}
 export const FENCE_POS=[.26,.50,.74];
 export const PADS=[.13,.20,.33,.40,.55,.63,.80,.88];
 export const TOWER_INFO:Record<TowerType,{name:string;cost:[number,number,number];range:number;rate:number;damage:number}>={
@@ -20,28 +22,34 @@ export const TOWER_INFO:Record<TowerType,{name:string;cost:[number,number,number
 };
 export const REBUILD_COST=[8,16,28];
 export const FAMILY:{[K in Family]:{hp:number;speed:number;reward:number;points:number}}={
- fox:{hp:24,speed:.046,reward:8,points:1},snake:{hp:17,speed:.072,reward:10,points:2},wolf:{hp:64,speed:.035,reward:17,points:3}
+ fox:{hp:24,speed:.046,reward:3,points:1},snake:{hp:17,speed:.072,reward:4,points:2},wolf:{hp:64,speed:.035,reward:6,points:3}
 };
 export const VARIANT:{[K in Variant]:{hp:number;speed:number;reward:number;points:number}}={
- basic:{hp:1,speed:1,reward:1,points:0},armored:{hp:1.7,speed:.88,reward:1.5,points:1},machine:{hp:2.4,speed:.83,reward:2,points:2}
+ basic:{hp:1,speed:1,reward:1,points:0},armored:{hp:1.7,speed:.88,reward:1.5,points:1},machine:{hp:2.8,speed:.92,reward:2,points:2}
 };
-export const WAVES:{family:Family;variant:Variant}[][]=Array.from({length:8},(_,w)=>{
- const n=9+w*3; const result:{family:Family;variant:Variant}[]=[];
- for(let i=0;i<n;i++){
-  const family:Family=w<2?(i%4===0?'snake':'fox'):(i%5===0?'wolf':i%3===0?'snake':'fox');
-  const variant:Variant=w>=6 && i%4===0?'machine':w>=2 && i%3===0?'armored':'basic';
-  result.push({family,variant});
- }
- return result;
-});
+export function makeWaves(seed:number):WaveEntry[][]{
+ let state=seed>>>0;const random=()=>((state=(Math.imul(state,1664525)+1013904223)>>>0)/4294967296);
+ const counts=[10,14,19,25,32,40,50,60];
+ return counts.map((base,w)=>{
+  const n=base+Math.floor(random()*5)-2,result:WaveEntry[]=[];
+  for(let i=0;i<n;i++){
+   const f=random(),v=random();
+   const family:Family=w<2?(f<.27?'snake':'fox'):f<(.14+w*.015)?'wolf':f<.43?'snake':'fox';
+   const variant:Variant=w>=6&&v<(w===6?.38:.56)?'machine':w>=2&&v<(.20+w*.045)?'armored':'basic';
+   result.push({family,variant});
+  }
+  if(w>=6)result[Math.floor(n*.55)]={family:w===7?'wolf':'fox',variant:'machine'};
+  return result;
+ });
+}
 export function makePlayer(id:string,name:string,bird:Bird):Player{return {id,name,bird,ready:false,connected:true,eggs:5,corn:100,charge:0,ostrichUntil:0,kills:0,killPoints:0,waves:0,towers:[],enemies:[],flowers:[]};}
-export function score(p:Player){return 1000*p.eggs+Math.min(250,p.killPoints)}
+export function score(p:Player){return 1000*p.eggs+Math.min(750,p.killPoints)}
 export function ranking(a:Player,b:Player){return score(b)-score(a)||b.waves-a.waves||b.kills-a.kills;}
 export function available(p:Player,type:TowerType){return ['fence','soy','fertilizer',({chicken:'peck',duck:'pond',goose:'honk'} as const)[p.bird]].includes(type)}
 export function laneY(x:number){return .52+.15*Math.sin(x*Math.PI*3.2)}
 export function spawnEnemy(game:Game,p:Player,config:{family:Family;variant:Variant}){
- const f=FAMILY[config.family],v=VARIANT[config.variant],scale=1+Math.max(0,game.wave-3)*.06;
- p.enemies.push({id:game.enemyId++,family:config.family,variant:config.variant,x:0,hp:Math.round(f.hp*v.hp*scale),maxHp:Math.round(f.hp*v.hp*scale),speed:f.speed*v.speed,fencePause:0,fenceIndex:-1,slowUntil:0,armorBreakUntil:0,hitFenceAt:0});
+ const f=FAMILY[config.family],v=VARIANT[config.variant],scale=1+Math.max(0,game.wave-2)*.11;
+ p.enemies.push({id:game.enemyId++,family:config.family,variant:config.variant,x:0,hp:Math.round(f.hp*v.hp*scale),maxHp:Math.round(f.hp*v.hp*scale),speed:f.speed*v.speed*(1+Math.max(0,game.wave-2)*.04)*(game.wave>=5?1.28:1),fencePause:0,fenceIndex:-1,slowUntil:0,armorBreakUntil:0,hitFenceAt:0});
 }
 function hit(enemy:Enemy,raw:number,level:number,now:number){
  if(enemy.variant==='machine'&&level<3)return false;
@@ -66,16 +74,17 @@ export function rebuild(p:Player,pad:number,phase:Phase){
 }
 export function tick(game:Game,dt:number,now:number){
  if(game.phase==='break'){
-  if(now>=game.nextAt){game.phase='wave';game.spawnIndex=0;game.nextSpawnAt=now+600;game.message=`Wave ${game.wave}: defend your eggs!`;}return;
+  if(game.nextAt>0&&now>=game.nextAt){game.phase='wave';game.spawnIndex=0;game.nextSpawnAt=now+600;game.message=`Wave ${game.wave}: defend your eggs!`;}return;
  }
  if(game.phase!=='wave')return;
- const config=WAVES[game.wave-1];
+ const config=game.wavePlan[game.wave-1];
  if(game.spawnIndex<config.length&&now>=game.nextSpawnAt){
   for(const p of game.players)if(p.eggs>0)spawnEnemy(game,p,config[game.spawnIndex]);
-  game.spawnIndex++;game.nextSpawnAt=now+(game.wave<3?1500:Math.max(950,1450-game.wave*55));
+  game.spawnIndex++;game.nextSpawnAt=now+(game.wave<4?1250:Math.max(600,1350-game.wave*85));
  }
  for(const p of game.players){
   if(p.eggs===0)continue;
+  game.effects[p.id]=(game.effects[p.id]||[]).filter(e=>e.until>now);
   p.flowers=p.flowers.filter(f=>f.until>now);
   for(const e of p.enemies){
    if(e.hp<=0)continue;
@@ -112,6 +121,7 @@ export function tick(game:Game,dt:number,now:number){
    const cfg=TOWER_INFO[t.type],boost=p.ostrichUntil>now?1.25:1;
    const target=p.enemies.filter(e=>e.hp>0&&e.variant!=='machine'||e.hp>0&&t.level===3).filter(e=>Math.abs(e.x-PADS[t.pad])<cfg.range+(t.level-1)*.017).sort((a,b)=>b.x-a.x)[0];
    if(!target)continue;
+   game.effects[p.id].push({id:game.enemyId++,type:t.type,from:PADS[t.pad],to:target.x,at:now,until:now+480,level:t.level});
    t.cooldown=cfg.rate/(boost*(1+(t.level-1)*.15));
    const power=cfg.damage*(1+(t.level-1)*.5)*boost;
    const strike=(e:Enemy,mult=1)=>hit(e,power*mult,t.level,now);
@@ -137,8 +147,9 @@ export function tick(game:Game,dt:number,now:number){
  }
  if(game.players.every(p=>p.eggs===0)){game.phase='results';game.message='All coops fell!';return;}
  if(game.spawnIndex===config.length&&game.players.every(p=>p.enemies.length===0)){
-  for(const p of game.players)if(p.eggs>0){p.eggs++;p.corn+=25+game.wave*3;p.waves=game.wave;}
-  if(game.wave===WAVES.length){game.phase='results';game.message='The final raid is over!';}
-  else {game.wave++;game.phase='break';game.nextAt=now+8000;game.message=`Wave cleared! +1 egg. Prepare for wave ${game.wave}.`;}
+  const cleared=game.wave;
+  for(const p of game.players)if(p.eggs>0){p.eggs++;p.corn+=12+game.wave*2;p.waves=game.wave;}
+  if(game.wave===game.wavePlan.length){game.phase='results';game.message='The final raid is over!';}
+  else {game.wave++;game.phase='break';game.nextAt=now+12000;game.message=`Wave cleared! +1 egg. Prepare for wave ${game.wave}.`;game.notice={text:`WAVE ${cleared} CLEARED · +1 EGG`,until:now+2600};}
  }
 }
