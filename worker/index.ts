@@ -82,7 +82,7 @@ export class GameRoom extends DurableObject<Env>{
    g.phase='break';g.wave=1;g.nextAt=0;g.message='Build your defenses. Any bird can start wave 1!';changed=true;this.startLoop();
   }
   if(type==='launch'&&g.phase==='break'&&p.eggs>0){
-   beginWave(g,Date.now());g.message=`${p.name} started the raid!`;changed=true;
+   const bonus=beginWave(g,Date.now());g.message=`${p.name} started wave ${g.wave}!${bonus?` +${bonus} corn for each coop.`:''}`;changed=true;
   }
   if(type==='rematch'&&g.phase==='results'){
    g.phase='lobby';g.wave=0;g.nextAt=0;g.spawnIndex=0;g.enemyId=1;g.message=`${p.name} called a rematch. Pick birds and ready up.`;g.notice=null;g.effects={};g.wavePlan=makeWaves(crypto.getRandomValues(new Uint32Array(1))[0]);
